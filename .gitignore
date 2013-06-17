@@ -15,4 +15,5 @@
 /tmp
 
 # ignoring the rvm setting file
-.rvmrc
+.ruby-gemset
+.ruby-version
