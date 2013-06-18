@@ -1,5 +1,5 @@
-# A sample Guardfile
-# More info at https://github.com/guard/guard#readme
+# allows us to use .singularize
+require 'active_support/core_ext'
 
 # notifications are automatically run through terminal-notifier gem
 
