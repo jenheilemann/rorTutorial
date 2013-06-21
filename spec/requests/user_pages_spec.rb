@@ -21,8 +21,15 @@ describe "User Pages" do
     let(:submit) { "Create my account" }
 
     describe "when no information is filled in" do
-      it "should not create a user" do
-        expect { click_button "Create my account" }.not_to change(User, :count)
+      before { click_button submit }
+      it "a user is not created" do
+        expect { click_button submit }.not_to change(User, :count)
+      end
+      it "error messages are displayed" do
+        should have_content('error')
+      end
+      it "password digest error is not displayed" do
+        should_not have_content('Password digest')
       end
     end
 
@@ -32,16 +39,12 @@ describe "User Pages" do
         fill_in "Email",            with: "user@example"
         fill_in "Password",         with: "foo"
         fill_in "Confirm Password", with: "bar"
+        click_button submit
       end
 
-      describe "after submission" do
-        before { click_button submit }
-
-        it { should have_selector('title', text: 'Sign up')}
-        it { should have_content('error')}
-      end
+      it { should have_selector('title', text: 'Sign Up')}
+      it { should have_content('error') }
     end
-
 
     describe "with valid information" do
       before do

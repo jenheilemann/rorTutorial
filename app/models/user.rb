@@ -24,4 +24,7 @@ class User < ActiveRecord::Base
 
   # ensure email uniqueness in all systems regardless of case
   before_save { email.downcase! }
+
+  # hide the error message about the password digest
+  after_validation { self.errors.messages.delete(:password_digest) }
 end
