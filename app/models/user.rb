@@ -8,6 +8,7 @@
 #  created_at      :datetime         not null
 #  updated_at      :datetime         not null
 #  password_digest :string(255)
+#  remember_token  :string(255)
 #
 
 class User < ActiveRecord::Base
@@ -25,6 +26,14 @@ class User < ActiveRecord::Base
   # ensure email uniqueness in all systems regardless of case
   before_save { email.downcase! }
 
+  # remember_token matches with the session manager to handle logins
+  before_save :create_remember_token
+
   # hide the error message about the password digest
   after_validation { self.errors.messages.delete(:password_digest) }
+
+  private
+    def create_remember_token
+      self.remember_token = "#{Time.now.hash}#{SecureRandom.urlsafe_base64}"
+    end
 end
