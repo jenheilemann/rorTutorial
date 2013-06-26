@@ -14,7 +14,6 @@ describe "User Pages" do
 
   describe "Edit" do
     let(:user) { FactoryGirl.create(:user) }
-    let(:user2) { FactoryGirl.create(:user, name: "Bob", email: "bob@nt.co") }
     before do
       sign_in user
       visit edit_user_path(user)
@@ -27,12 +26,6 @@ describe "User Pages" do
       it { should have_link('change', href: "http://gravatar.com/emails") }
     end
 
-    describe "without authorization" do
-      before { visit edit_user_path(user2) }
-      it { should have_error_message("permission") }
-      it { current_path.should == root_url }
-    end
-
     describe "with invalid information" do
       before { click_button "Save changes" }
       it { should have_selector('h1', text: 'Update your profile') }
@@ -40,15 +33,25 @@ describe "User Pages" do
     end
 
     describe "with valid information" do
+      let(:new_name)  { "New name" }
+      let(:new_email) { "new@email.com" }
       before do
-        valid_signup
+        fill_in "Name",             with: new_name
+        fill_in "Email",            with: new_email
+        fill_in "Password",         with: user.password
+        fill_in "Confirm Password", with: user.password
         click_button "Save changes"
       end
+
+      it { current_path.should == user_path(user) }
       it { should_not have_error_message "error" }
-      it { should have_success_message "saved" }
-      it { should have_content(user.name) }
-      it { should have_title(user.name) }
+      it { should have_success_message "updated" }
+      it { should have_content(new_name) }
+      it { should have_title(new_name) }
+      it { should have_link('Sign out', href: signout_path) }
       it { should have_selector('img.gravatar')}
+      specify { user.reload.name.should  == new_name }
+      specify { user.reload.email.should == new_email }
     end
   end
 
