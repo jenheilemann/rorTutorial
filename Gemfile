@@ -4,6 +4,7 @@ ruby '1.9.3'
 gem 'rails', '3.2.13'
 gem 'pg', '0.12.2'
 gem 'bootstrap-sass', '2.1'
+gem 'jquery-rails'
 
 # To use ActiveModel has_secure_password
 gem 'bcrypt-ruby', '3.0.1'
@@ -21,8 +22,6 @@ group :assets do
   gem 'coffee-rails', '3.2.2'
   gem 'uglifier',     '1.2.3'
 end
-
-gem 'jquery-rails'
 
 group :development do
   gem 'annotate', '2.5.0'
