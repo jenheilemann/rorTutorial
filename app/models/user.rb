@@ -32,6 +32,8 @@ class User < ActiveRecord::Base
   # hide the error message about the password digest
   after_validation { self.errors.messages.delete(:password_digest) }
 
+  self.per_page = 15
+
   private
     def create_remember_token
       self.remember_token = "#{Time.now.hash}#{SecureRandom.urlsafe_base64}"
