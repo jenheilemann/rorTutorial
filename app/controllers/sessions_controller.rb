@@ -1,4 +1,5 @@
 class SessionsController < ApplicationController
+  before_filter :signed_in_user, only: [:new, :create]
 
   def new
   end
@@ -11,7 +12,7 @@ class SessionsController < ApplicationController
       redirect_back_or user
     else
       # errorz
-      flash.now[:error] = 'Invalid email/password combination'
+      flash.now[:error] = 'Invalid email/password combination.'
       render 'new'
     end
   end
@@ -19,6 +20,14 @@ class SessionsController < ApplicationController
   def destroy
     # sign the user out
     sign_out
-    redirect_to root_url
+    flash[:success] = "You've been signed out."
+    redirect_to signin_path
+  end
+
+private
+
+  def signed_in_user
+    # signed in users don't need the login form
+    redirect_to user_path(current_user) if signed_in?
   end
 end
