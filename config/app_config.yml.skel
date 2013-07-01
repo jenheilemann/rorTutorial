@@ -1,0 +1,12 @@
+# Sensitive application configuration information
+
+development: &default
+  admin_password:    password # Admin password for the admin account. Use whatever, it's your DB!
+  admin_email:       myemail@nerdery.com
+  user_email:        example@railstutorial.org
+
+test:
+  <<: *default
+
+production:
+  <<: *default

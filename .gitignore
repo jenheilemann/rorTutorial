@@ -17,3 +17,6 @@
 # ignoring the rvm setting file
 .ruby-gemset
 .ruby-version
+
+# app config file with sensative settings
+/config/app_config.yml
