@@ -5,3 +5,8 @@
 require File.expand_path('../config/application', __FILE__)
 
 SampleApp::Application.load_tasks
+
+if Rails.env.development?
+  # https://github.com/ctran/annotate_models
+  require 'annotate/tasks'
+end

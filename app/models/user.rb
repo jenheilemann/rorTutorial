@@ -1,4 +1,5 @@
 # == Schema Information
+# Schema version: 20130701161224
 #
 # Table name: users
 #
@@ -10,6 +11,11 @@
 #  password_digest :string(255)
 #  remember_token  :string(255)
 #  admin           :boolean          default(FALSE)
+#
+# Indexes
+#
+#  index_users_on_email           (email) UNIQUE
+#  index_users_on_remember_token  (remember_token)
 #
 
 class User < ActiveRecord::Base
