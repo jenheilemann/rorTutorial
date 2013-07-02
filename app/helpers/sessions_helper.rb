@@ -34,4 +34,15 @@ module SessionsHelper
     redirect_to (session[:return_to] || default)
     session.delete(:return_to)
   end
+
+  # when peeps are attempting to access restricted areas, save where they were
+  # trying to go, then send them to the sign in page. We use the saved location
+  # after they sign in to redirect them back
+  def signed_in_user
+    unless signed_in?
+      store_location
+      redirect_to signin_url, notice: "Please sign in."
+    end
+  end
+
 end
