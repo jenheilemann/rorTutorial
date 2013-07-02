@@ -49,11 +49,30 @@ describe "User Pages" do
 
   describe "Profile page" do
     let(:user) { FactoryGirl.create(:user) }
+
     before { visit user_path(user) }
 
     it { should have_content(user.name) }
     it { should have_title(user.name) }
     it { should have_selector('img.gravatar') }
+    it { should_not have_content("Microposts (#{user.microposts.count})") }
+
+    describe "microposts" do
+      let!(:mp1) { FactoryGirl.create(:micropost, user: user, content: "Foo") }
+      let!(:mp2) { FactoryGirl.create(:micropost, user: user, content: "Bar") }
+      before { visit user_path(user) }
+
+      it { should have_content(mp1.content) }
+      it { should have_content(mp2.content) }
+      it { should have_content("Microposts (#{user.microposts.count})") }
+
+      describe "pagination" do
+        before(:all) { 30.times { FactoryGirl.create(:micropost, user: user) } }
+        after(:all)  { User.delete_all }
+
+        it { should have_selector('div.pagination') }
+      end
+    end
   end
 
   describe "Edit" do

@@ -9,4 +9,10 @@ FactoryGirl.define do
       admin true
     end
   end
+
+  factory :micropost do
+    # make sure we're under the 160 character limit
+    content { Faker::Lorem.sentence(6)[0..159] }
+    user
+  end
 end
