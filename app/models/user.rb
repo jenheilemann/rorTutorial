@@ -42,6 +42,10 @@ class User < ActiveRecord::Base
 
   self.per_page = 15
 
+  def feed
+    Micropost.where("user_id = ?", id)
+  end
+
   private
     def create_remember_token
       self.remember_token = "#{Time.now.hash}#{SecureRandom.urlsafe_base64}"

@@ -1,0 +1,20 @@
+<% provide(:title, current_user.name) %>
+<div class="row">
+  <aside class="span4">
+    <section>
+      <%= render 'users/mini_profile' %>
+    </section>
+    <section>
+      <%= render 'form' %>
+    </section>
+  </aside>
+
+  <div class="span8">
+    <h3>Your Feed</h3>
+    <ol class="microposts">
+      <%= will_paginate @microposts %>
+      <%= render partial: 'micropost', collection: @microposts %>
+      <%= will_paginate @microposts %>
+    </ol>
+  </div>
+</div>

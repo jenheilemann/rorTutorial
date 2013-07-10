@@ -44,6 +44,7 @@ describe User do
     it { should respond_to(:remember_token) }
     it { should respond_to(:admin) }
     it { should respond_to(:microposts) }
+    it { should respond_to(:feed) }
     it { should_not be_admin }
     it "should not allow access to admin" do
       expect do
@@ -170,6 +171,20 @@ describe User do
       microposts.should_not be_empty
       microposts.each do |post|
         Micropost.find_by_id(post.id).should be_nil
+      end
+    end
+
+    describe "feed" do
+      describe "should have a list of microposts" do
+        its(:feed) { should include(newer_micropost) }
+        its(:feed) { should include(older_micropost) }
+      end
+
+      describe "not all microposts" do
+        let(:unfollowed_post) do
+          FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
+        end
+        its(:feed) { should_not include(unfollowed_post) }
       end
     end
   end

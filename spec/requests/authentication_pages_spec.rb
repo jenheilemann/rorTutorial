@@ -44,7 +44,7 @@ describe "Authentication" do
       let(:user) { FactoryGirl.create(:user) }
       before { valid_signin(user) }
 
-      specify { current_path.should == user_path(user) }
+      specify { current_path.should == root_path }
       it { should have_title(user.name) }
       it { should_not have_error_message('Invalid') }
 
@@ -100,6 +100,7 @@ describe "Authentication" do
 
               it "should render the default profile page" do
                 page.should have_title(user.name)
+                current_path.should == root_path
               end
             end
           end
@@ -126,10 +127,19 @@ describe "Authentication" do
           specify { response.should redirect_to(signin_path)}
         end
       end
+
+      describe "in the static pages" do
+        describe "the home page" do
+          it { should_not have_selector('img.gravatar') }
+          it { should_not have_selector('div.pagination') }
+          it { should_not have_selector('form') }
+        end
+      end
     end
 
     describe "as signed-in user" do
-      let(:user) { FactoryGirl.create(:user) }
+      let(:user)      { FactoryGirl.create(:user) }
+      let(:micropost) { FactoryGirl.create(:micropost, user: user) }
       before { sign_in user }
 
       describe "visit the new user form" do
@@ -164,6 +174,7 @@ describe "Authentication" do
     describe "as wrong user" do
       let(:user)       { FactoryGirl.create(:user) }
       let(:wrong_user) { FactoryGirl.create(:user, email: "wrong@examle.com") }
+      let(:micropost)  { FactoryGirl.create(:micropost, user: wrong_user) }
       before { sign_in user }
 
       describe "visiting the Users/edit page" do
@@ -174,6 +185,12 @@ describe "Authentication" do
 
       describe "submitting a PUT request to the Users#update action" do
         before { put user_path(wrong_user) }
+        specify { response.should redirect_to root_path }
+      end
+
+      describe "submitting a DELETE request to the Microposts#destory action" do
+        before { delete micropost_path(micropost) }
+        it      { should_not have_success_message("deleted") }
         specify { response.should redirect_to root_path }
       end
     end
