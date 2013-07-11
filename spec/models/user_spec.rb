@@ -31,7 +31,6 @@ describe User do
   end
   subject { @user }
 
-
   it { should be_valid }
 
   describe "accessible attributes" do
@@ -45,6 +44,13 @@ describe User do
     it { should respond_to(:admin) }
     it { should respond_to(:microposts) }
     it { should respond_to(:feed) }
+    it { should respond_to(:relationships) }
+    it { should respond_to(:reverse_relationships) }
+    it { should respond_to(:followed_users) }
+    it { should respond_to(:followers) }
+    it { should respond_to(:follow!) }
+    it { should respond_to(:unfollow!) }
+    it { should respond_to(:following?) }
     it { should_not be_admin }
     it "should not allow access to admin" do
       expect do
@@ -151,33 +157,22 @@ describe User do
   end
 
   describe "micropost association" do
-    before { @user.save }
-    let!(:older_micropost) do
-      FactoryGirl.create(:micropost, user: @user, created_at: 1.day.ago )
-    end
-    let!(:newer_micropost) do
-      FactoryGirl.create(:micropost, user: @user, created_at: 1.hour.ago )
-    end
+    let!(:user)   { FactoryGirl.create(:user) }
+    let!(:old_mp) { FactoryGirl.create(:micropost, user: user, created_at: 1.day.ago) }
+    let!(:new_mp) { FactoryGirl.create(:micropost, user: user, created_at: 1.hour.ago) }
+    before { user.save! }
+    subject { user }
 
     it "should have the right microposts in the right order" do
       # simultaneously tests that the has_many association is working,
       # and that the microposts are returned with newest on top
-      @user.microposts.should == [newer_micropost, older_micropost]
-    end
-    it "should destory associated microposts on delete" do
-      microposts = @user.microposts.dup
-      @user.destroy
-      # sanity check
-      microposts.should_not be_empty
-      microposts.each do |post|
-        Micropost.find_by_id(post.id).should be_nil
-      end
+      user.microposts.should == [new_mp, old_mp]
     end
 
     describe "feed" do
       describe "should have a list of microposts" do
-        its(:feed) { should include(newer_micropost) }
-        its(:feed) { should include(older_micropost) }
+        its(:feed) { should include(new_mp) }
+        its(:feed) { should include(old_mp) }
       end
 
       describe "not all microposts" do
@@ -185,6 +180,81 @@ describe User do
           FactoryGirl.create(:micropost, user: FactoryGirl.create(:user))
         end
         its(:feed) { should_not include(unfollowed_post) }
+      end
+    end
+  end
+
+  describe "following" do
+    let(:other_user)        { FactoryGirl.create(:user) }
+    let(:not_followed_user) { FactoryGirl.create(:user) }
+    before do
+      @user.save
+      @user.follow!(other_user)
+    end
+
+    # test for the positive
+    it { should be_following(other_user) }
+    its(:followed_users) { should include(other_user) }
+    # test for the negative
+    it { should_not be_following(not_followed_user) }
+    its(:followed_users) { should_not include(not_followed_user) }
+
+    describe "and followed user" do
+      subject { other_user }
+      its(:followers) { should include(@user) }
+    end
+    describe "and unfollowing" do
+      before { @user.unfollow!(other_user) }
+
+      it { should_not be_following(other_user) }
+      its(:followed_users) { should_not include(other_user) }
+    end
+  end
+
+  describe "destroying a user" do
+    # creating a temporary user variable for this test so destroying it doesn't
+    # mess up the other tests
+    let(:user)      { FactoryGirl.create(:user) }
+    let(:followed1) { FactoryGirl.create(:user) }
+    let(:followed2) { FactoryGirl.create(:user) }
+    before do
+      user.save
+      user.relationships.create(followed_id: followed1.id)
+      user.relationships.create(followed_id: followed2.id)
+      user.microposts.create(content: "Some content.")
+      user.microposts.create(content: "Other content.")
+    end
+
+    it "should destroy microposts" do
+      microposts = user.microposts.dup
+      user.destroy
+      # sanity check
+      microposts.should_not be_empty
+      microposts.each do |post|
+        Micropost.find_by_id(post.id).should be_nil
+      end
+    end
+
+    it "should destroy relationships" do
+      relationships = user.relationships.dup
+      user.destroy
+      # sanity check
+      relationships.should_not be_empty
+      relationships.each do |relationship|
+        Relationship.find_by_id(relationship.id).should be_nil
+      end
+    end
+
+    describe "followed user relationships" do
+      subject { followed1 }
+      it "should be destroyed" do
+        followers = followed1.followers.dup
+        user.destroy
+        # sanity check
+        followers.should_not be_empty
+        followers.each do |follower|
+          Relationship.find_by_id(follower.id).should be_nil
+        end
       end
     end
   end
