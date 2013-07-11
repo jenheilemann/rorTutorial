@@ -36,6 +36,12 @@ describe Relationship do
         Relationship.new(follower_id: follower.id)
       end.to raise_error(ActiveModel::MassAssignmentSecurity::Error)
     end
+    it "should not allow a duplicate follower" do
+      expect do
+        follower.relationships.create(followed_id: followed.id)
+        follower.relationships.create(followed_id: followed.id)
+      end.to raise_error(ActiveRecord::RecordNotUnique)
+    end
   end
 
   describe "follower methods" do
