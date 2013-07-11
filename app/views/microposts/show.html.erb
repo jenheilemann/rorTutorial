@@ -12,7 +12,6 @@
   <div class="span8">
     <h3>Your Feed</h3>
     <ol class="microposts">
-      <%= will_paginate @microposts %>
       <%= render partial: 'micropost', collection: @microposts %>
       <%= will_paginate @microposts %>
     </ol>
