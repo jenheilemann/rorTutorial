@@ -44,6 +44,10 @@ describe Relationship do
     end
   end
 
+  describe "should not allow a user to follow themselves" do
+    let(:bad_relationship) { follower.relationships.build(followed_id: follower.id) }
+    specify { bad_relationship.should_not be_valid }
+  end
   describe "follower methods" do
     its(:follower) { should == follower }
     its(:followed) { should == followed }

@@ -21,4 +21,11 @@ class Relationship < ActiveRecord::Base
 
   belongs_to :follower, class_name: "User"
   belongs_to :followed, class_name: "User"
+
+  validate :follower_and_followed_cannot_be_equal
+
+  def follower_and_followed_cannot_be_equal
+    errors.add(:base, "You can't follow yourself") if follower == followed
+  end
+
 end
