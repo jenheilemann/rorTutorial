@@ -42,14 +42,23 @@ describe Relationship do
         follower.relationships.create(followed_id: followed.id)
       end.to raise_error(ActiveRecord::RecordNotUnique)
     end
+    describe "when followed id is not present" do
+      before { relationship.followed_id = nil }
+      it { should_not be_valid }
+    end
+    describe "when follower id is not present" do
+      before { relationship.follower_id = nil }
+      it { should_not be_valid }
+    end
   end
 
-  describe "should not allow a user to follow themselves" do
-    let(:bad_relationship) { follower.relationships.build(followed_id: follower.id) }
-    specify { bad_relationship.should_not be_valid }
-  end
   describe "follower methods" do
+    let(:bad_relationship) { follower.relationships.build(followed_id: follower.id) }
+
     its(:follower) { should == follower }
     its(:followed) { should == followed }
+    it "should not allow a user follow themselves" do
+      bad_relationship.should_not be_valid
+    end
   end
 end

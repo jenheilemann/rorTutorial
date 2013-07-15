@@ -19,19 +19,31 @@ describe "MicropostPages" do
       it { should have_selector('img.gravatar') }
       it { should have_content ("2 microposts") }
     end
+
+    describe "follower/following counts" do
+      let(:other_user) { FactoryGirl.create(:user) }
+      before do
+        user.follow!(other_user)
+        visit root_path
+      end
+
+      it { should have_link("1 following", href: following_user_path(user)) }
+      it { should have_link("0 followers", href: followers_user_path(user)) }
+    end
   end
 
   describe "pagination" do
+    # creating a different user because we need to delete this one eventually
+    # and rspec doesn't properly clear out this user from the database
     let(:other_user) { FactoryGirl.create(:user) }
     before(:all) { 50.times { FactoryGirl.create(:micropost, user: other_user) } }
     after(:all) do
-      Micropost.delete_all
       other_user.delete
     end
 
-    describe "should exist" do
+    describe "on the profile pages" do
       before do
-        sign_in user
+        sign_in other_user
         visit user_path(other_user)
       end
 
