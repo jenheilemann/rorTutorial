@@ -212,8 +212,8 @@ describe User do
   end
 
   describe "destroying a user" do
-    # creating a temporary user variable for this test so destroying it doesn't
-    # mess up the other tests
+    # creating a temporary user variable for these tests so destroying it
+    # doesn't mess up the other tests
     let(:user)      { FactoryGirl.create(:user) }
     let(:followed1) { FactoryGirl.create(:user) }
     let(:followed2) { FactoryGirl.create(:user) }
@@ -245,17 +245,10 @@ describe User do
       end
     end
 
-    describe "followed user relationships" do
+    it "should destroy reverse relationships" do
       subject { followed1 }
-      it "should be destroyed" do
-        followers = followed1.followers.dup
-        user.destroy
-        # sanity check
-        followers.should_not be_empty
-        followers.each do |follower|
-          Relationship.find_by_id(follower.id).should be_nil
-        end
-      end
+      user.destroy
+      followed1.followers.should_not include(user)
     end
   end
 
