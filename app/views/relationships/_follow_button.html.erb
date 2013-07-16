@@ -1,0 +1,17 @@
+<% user ||= @user %>
+<% unless current_user?(user) %>
+  <div class="follow_form" id="user_<%= user.id %>">
+    <% if current_user.following?(user) %>
+      <% relationship = current_user.relationships.find_by_followed_id(user) %>
+      <%= form_for(relationship, html: { method: :delete }, remote: true) do |f| %>
+        <%= f.submit "Unfollow", class: "btn btn-medium" %>
+      <% end %>
+    <% else %>
+      <% relationship = current_user.relationships.build(followed_id: user.id) %>
+      <%= form_for(relationship, remote: true) do |f| %>
+        <%= f.hidden_field :followed_id %>
+        <%= f.submit "Follow", class: "btn btn-medium btn-primary" %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

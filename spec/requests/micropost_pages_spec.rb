@@ -11,8 +11,11 @@ describe "MicropostPages" do
       sign_in user
       visit root_path
     end
-    it { should have_selector("li##{mp1.id}", text: mp1.content) }
-    it { should have_selector("li##{mp2.id}", text: mp2.content) }
+
+    it "should render the user's feed" do
+      should have_selector("li##{mp1.id}", text: mp1.content)
+      should have_selector("li##{mp2.id}", text: mp2.content)
+    end
 
     describe "sidebar" do
       it { should have_button("Post") }

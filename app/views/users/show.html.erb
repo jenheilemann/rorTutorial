@@ -13,6 +13,7 @@
   </aside>
 
   <div class="span8">
+    <%= render 'relationships/follow_button' if signed_in? %>
     <% if @user.microposts.any? %>
     <h3>Microposts (<%= @user.microposts.count %>)</h3>
     <ol class="microposts">

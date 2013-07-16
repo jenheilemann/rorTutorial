@@ -45,6 +45,18 @@ describe "User Pages" do
         end
       end
     end
+
+    describe "follow/unfollow buttons" do
+      let!(:other_user) { FactoryGirl.create(:user) }
+      before { visit users_path }
+
+      it { should have_button("Follow") }
+      describe "clicking the button changes the page" do
+        before { click_button "Follow" }
+
+        it { should have_button("Unfollow") }
+      end
+    end
   end
 
   describe "Profile page" do
@@ -83,6 +95,71 @@ describe "User Pages" do
 
       it { should have_link("0 following", href: following_user_path(user)) }
       it { should have_link("1 followers", href: followers_user_path(user)) }
+      it { should_not have_button("Follow") }
+      it { should_not have_button("Unfollow") }
+    end
+
+    describe "other user profile" do
+      let(:other_user) { FactoryGirl.create(:user) }
+      before do
+        sign_in(user)
+        visit user_path(other_user)
+      end
+
+      it { should have_content(other_user.name) }
+      it { should have_title(other_user.name) }
+      it { should have_link("0 following", href: following_user_path(other_user)) }
+      it { should have_link("0 followers", href: followers_user_path(other_user)) }
+      it { should have_button("Follow") }
+
+      describe "follow/unfollow buttons:" do
+        describe "following a user" do
+          it "should increment the followed user count" do
+            expect do
+              click_button("Follow")
+            end.to change(user.followed_users, :count).by(1)
+          end
+
+          it "should increment the other user's followers count" do
+            expect do
+              click_button("Follow")
+            end.to change(other_user.followers, :count).by(1)
+          end
+
+          describe "change the page values" do
+            before { click_button "Follow" }
+
+            it { should have_button("Unfollow") }
+            it { should have_link("1 followers", href: followers_user_path(other_user)) }
+          end
+        end
+
+        describe "unfollowing a user" do
+          before do
+            user.follow!(other_user)
+            visit user_path(other_user)
+          end
+
+          it "should decrement the followed user count" do
+            expect do
+              click_button("Unfollow")
+            end.to change(user.followed_users, :count).by(-1)
+          end
+
+          it "should decrement the other user's followers count" do
+            expect do
+              click_button("Unfollow")
+            end.to change(other_user.followers, :count).by(-1)
+          end
+
+          describe "change the page values" do
+            before { click_button "Unfollow" }
+
+            it { should have_button("Follow") }
+            it { should have_link("0 followers", href: followers_user_path(other_user)) }
+          end
+        end
+      end
     end
   end
 
@@ -175,6 +252,53 @@ describe "User Pages" do
         it { should have_success_message('Welcome') }
         it { should have_link('Sign out') }
       end
+    end
+  end
+
+  describe "Following/Follower lists" do
+    let(:user)       { FactoryGirl.create(:user) }
+    let(:other_user) { FactoryGirl.create(:user) }
+    let(:third_user) { FactoryGirl.create(:user) }
+    before do
+      user.follow!(other_user)
+      third_user.follow!(other_user)
+      sign_in user
+    end
+
+    describe "followed users" do
+      before { visit following_user_path(user) }
+
+      it { should have_title("Following") }
+      it { should have_selector('h3', text: "Following") }
+      it { should have_content(user.name) }
+      it { should have_link("1 following", href: following_user_path(user)) }
+      it { should have_link("0 followers", href: followers_user_path(user)) }
+
+      # there should just be the :other_user listed, with the unfollow button
+      it { should have_link(other_user.name, href: user_path(other_user)) }
+      it { should have_button("Unfollow") }
+      # all users listed on this page will be followed by the current user, so
+      # no "follow" buttons should be visible
+      it { should_not have_button("Follow") }
+    end
+
+    describe "followers" do
+      before { visit followers_user_path(other_user) }
+
+      it { should have_title("Followers") }
+      it { should have_selector('h3', text: "Followers") }
+      it { should have_content(other_user.name) }
+      it { should have_link("0 following", href: following_user_path(other_user)) }
+      it { should have_link("2 followers", href: followers_user_path(other_user)) }
+
+      # there should both be the :user and the :third_user listed here
+      it { should have_link(user.name, href: user_path(user)) }
+      it { should have_link(third_user.name, href: user_path(third_user)) }
+
+      # the :third_user should have the Follow button active, since :user isn't
+      # following them yet; but their own listing should have no button visible
+      it { should_not have_button("Unfollow") }
+      it { should     have_button("Follow") }
     end
   end
 end

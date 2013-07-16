@@ -1,0 +1,13 @@
+// Toggling the button from Follow to Unfollow
+$('#user_<%= @user.id %>.follow_form').replaceWith(
+  "<%= escape_javascript(render('follow_button')) %>"
+  );
+
+// Increment or decrement the number of followers (if other user profile)
+$('#<%= @user.id %>_followers').html("<%= @user.followers.count %>");
+
+// Increment or decrement the number of users the current user is following
+// (if main profile or current user's followers list)
+$('#<%= current_user.id %>_following').html(
+  "<%= current_user.followed_users.count %>"
+  );

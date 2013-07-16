@@ -5,4 +5,5 @@
     | <%= link_to "delete", user, method: :delete,
                                   data: { confirm: "You sure?" } %>
   <% end %>
+  <%= render partial: 'relationships/follow_button', locals: { user: user } %>
 </li>

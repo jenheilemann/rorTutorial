@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
   # signed_in_user is in the SessionsHelper, included in ApplicationController
-  before_filter :signed_in_user,      only: [:edit,:update,:index,:destroy]
+  before_filter :signed_in_user,      only: [:edit,:update,:index,:destroy,
+                                             :following, :followers]
 
   before_filter :user_to_edit_screen, only: [:new,:create]
   before_filter :the_same_user,       only: [:edit,:update]
@@ -21,6 +22,7 @@ class UsersController < ApplicationController
   end
 
   def edit
+    # @user is set in the before_filter :the_same_user
   end
 
   def create
@@ -50,6 +52,22 @@ class UsersController < ApplicationController
     @user.destroy
     flash[:success] = "User #{@user.name} (#{@user.id}) destroyed."
     redirect_to users_url
+  end
+
+  def following
+    @title = "Following"
+    @user = User.find(params[:id])
+    @users = @user.followed_users.paginate(page: params[:page], per_page: 30)
+    @all_users = @user.followed_users
+    render 'index_relationships'
+  end
+
+  def followers
+    @title = "Followers"
+    @user = User.find(params[:id])
+    @users = @user.followers.paginate(page: params[:page], per_page: 30)
+    @all_users = @user.followers
+    render 'index_relationships'
   end
 
 private

@@ -1,0 +1,30 @@
+<% provide(:title, @title) %>
+
+<div class="row">
+  <aside class="span4">
+    <section>
+      <%= render 'mini_profile' %>
+    </section>
+    <section>
+      <%= render 'stats' %>
+      <% if @all_users.any? %>
+      <div class="user_avatars">
+        <% @all_users.each do |user| %>
+        <%= link_to gravatar_for(user, size: 28), user %>
+        <% end %>
+      </div>
+      <% end %>
+    </section>
+  </aside>
+  <div class="span8">
+    <h3><%= @title %></h3>
+    <% if @users.any? %>
+    <ul class="users">
+      <% @users.each do |user| %>
+      <%= render partial: 'list', locals: { user: user } %>
+      <% end %>
+    </ul>
+    <%= will_paginate %>
+    <% end %>
+  </div>
+</div>

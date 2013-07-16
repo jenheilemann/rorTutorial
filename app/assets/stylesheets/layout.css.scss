@@ -217,6 +217,9 @@ input {
     &:last-child {
       border-bottom: 1px solid $grayLighter;
     }
+    form {
+      margin-bottom: 0;
+    }
   }
 }
 
